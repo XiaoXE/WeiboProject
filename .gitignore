@@ -1,8 +1,25 @@
-!WeiboSpider-search/
 WeiboSpider-search/sina/account_build/*.txt
 
-!WeiboSpider-searchName/
 WeiboSpider-searchName/sina/account_build/*.txt
 
-!haipproxy-0.1/
 Git/
+
+fastaidata/
+
+fastaiv3/
+
+IPProxyTool-master
+
+kedswant_spider
+
+MongoDB
+
+phantomjs-2.1.1-windows
+
+Redis
+
+RedisClient
+
+WeiboSpider-senior
+
+*.rar
