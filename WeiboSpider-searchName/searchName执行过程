@@ -1,0 +1,88 @@
+务必要从头开始执行一遍
+
+NOTE：不要关掉cmd窗口！
+
+启动redis-service服务：
+打开cmd，输入一下命令（定位到你的redis所在的文件路径）：
+E:\>cd FDSM_HeXiao\Redis
+
+E:\FDSM_HeXiao\Redis>redis-server.exe redis.windows.conf
+                _._
+           _.-``__ ''-._
+      _.-``    `.  `_.  ''-._           Redis 3.0.504 (00000000/0) 64 bit
+  .-`` .-```.  ```\/    _.,_ ''-._
+ (    '      ,       .-`  | `,    )     Running in standalone mode
+ |`-._`-...-` __...-.``-._|'` _.-'|     Port: 6379
+ |    `-._   `._    /     _.-'    |     PID: 13016
+  `-._    `-._  `-./  _.-'    _.-'
+ |`-._`-._    `-.__.-'    _.-'_.-'|
+ |    `-._`-._        _.-'_.-'    |           http://redis.io
+  `-._    `-._`-.__.-'_.-'    _.-'
+ |`-._`-._    `-.__.-'    _.-'_.-'|
+ |    `-._`-._        _.-'_.-'    |
+  `-._    `-._`-.__.-'_.-'    _.-'
+      `-._    `-.__.-'    _.-'
+          `-._        _.-'
+              `-.__.-'
+
+[13016] 01 Mar 15:08:08.523 # Server started, Redis version 3.0.504
+[13016] 01 Mar 15:08:09.263 * DB loaded from disk: 0.730 seconds
+[13016] 01 Mar 15:08:09.263 * The server is now ready to accept connections on port 6379
+
+
+启动代理池
+（https://github.com/SpiderClub/haipproxy/blob/master/README.md）
+    启动scrapy-splash：
+    打开cmd
+    docker run -p 8050:8050 scrapinghub/splash
+
+
+    启动scrapy worker，包括代理IP采集器和校验器
+    cmd定位到haipproxy-0.1所在的文件夹，并启动sinaspider环境；
+    C:\Users\Admin>E:
+
+    E:\>cd E:\FDSM_HeXiao\haipproxy-0.1
+
+    E:\FDSM_HeXiao\haipproxy-0.1>activate sinaspider
+
+    python crawler_booter.py --usage crawler
+
+    打开cmd定位到haipproxy-0.1所在的文件夹，并启动sinaspider环境；
+    python crawler_booter.py --usage validator
+
+
+    启动调度器，包括代理IP定时调度和校验
+    打开cmd定位到haipproxy-0.1所在的文件夹，并启动sinaspider环境；
+    python scheduler_booter.py --usage crawler
+    打开cmd定位到haipproxy-0.1所在的文件夹，并启动sinaspider环境；
+    python scheduler_booter.py --usage validator
+
+    输出代理ip
+    打开cmd定位到haipproxy-0.1所在的文件夹，并启动sinaspider环境；
+
+    E:\>cd FDSM_HeXiao\haipproxy-0.1\
+    python ./examples/zhihu/mytest.py
+
+
+0.打开cmd，输入以下的命令（定位到你的WeiboSpider-searchName文件夹所在的路径）：
+C:\Users\Admin>E:
+
+E:\>cd FDSM_HeXiao\WeiboSpider-searchName
+E:\FDSM_HeXiao\WeiboSpider-searchName>activate sinaspider
+(https://github.com/nghuyong/WeiboSpider/tree/search)
+1.将购买的账号复制到sina/account_build/account.txt中，格式与account_sample.txt保持一致。
+2.构建账号池（构建一次就可以，不需要重复构建）
+python sina/account_build/login.py
+3.初始化redis
+
+分布式爬虫是所有的爬虫都从redis中获取URL
+
+所以首先向redis中填充初始的URL
+
+请将sina/redis_init.py中的 日期修改成你自己需要的（对某天之后爬到的昵称进行爬取）
+
+python sina/redis_init.py
+如果出现ConnectionRefusedError: [WinError 10061] 由于目标计算机积极拒绝，无法连接。说明没有启动redis服务，先启动redis-service
+4.运行爬虫
+
+scrapy crawl weibo_spider2
