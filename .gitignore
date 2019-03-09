@@ -1,8 +1,8 @@
-!WeiboSpider-search/*
+!WeiboSpider-search/
 WeiboSpider-search/sina/account_build/*.txt
 
-!WeiboSpider-searchName/*
+!WeiboSpider-searchName/
 WeiboSpider-searchName/sina/account_build/*.txt
 
-!haipproxy-0.1/*
+!haipproxy-0.1/
 Git/
