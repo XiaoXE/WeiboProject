@@ -25,3 +25,7 @@ RedisClient
 WeiboSpider-senior
 
 *.rar
+
+WeiboSpider-search/.idea/workspace.xml
+WeiboSpider-searchv2/.idea/workspace.xml
+WeiboSpider-searchName/.idea/workspace.xml
