@@ -10,6 +10,7 @@ from scrapy_redis.spiders import RedisSpider
 from sina.items import TweetsItem, InformationItem, CommentItem
 from sina.spiders.utils import time_fix
 import time
+import requests
 
 # TODO 获取提问人的信息 done
 # TODO 获取微博的评论信息 done
@@ -94,12 +95,18 @@ class WeiboSpider(RedisSpider):
                 tweet_item['asker_name'] = asker_name_urltxt.split('@')[-1]
                 # asker_name_url = self.base_url + asker_name_url
                 # print('提问者的昵称', tweet_item['asker_name'])
-
+                response_nickname = requests.get(asker_name_url)
+                response_url = response_nickname.url
+                if 'weibo.cn/u/' in response_url:
+                    nickname_id = response_url.split('weibo.cn/u/')[-1]
+                else:
+                    nickname_id = response_url.split('uid=')[-1]
                 # TODO 这里yield一个提问者的request
                 # https://blog.csdn.net/rgc_520_zyl/article/details/78946974
                 # header = {,'User-Agent': 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.109 Safari/537.36'}
                 # asker 表的 _id 应该是tweet _id
-                yield Request(url=asker_name_url, callback=self.parse_asker, meta={'asker_from': tweet_item['_id']})
+                yield Request(url="https://weibo.cn/{}/info".format(nickname_id),
+                              callback=self.parse_information, priority=3, meta={'asker_from': tweet_item['weibo_url']})
 
                 # 检测由没有阅读全文:
                 all_content_link = tweet_content_node.xpath('.//a[text()="全文"]')
