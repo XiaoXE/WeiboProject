@@ -32,3 +32,7 @@ WeiboSpider-searchName/.idea/
 WeiboSpider-search/sina/__pycache__/
 WeiboSpider-searchName/sina/__pycache__/
 WeiboSpider-searchv2/sina/__pycache__/
+WeiboSpider-search/sina/spiders/__pycache__/
+WeiboSpider-searchName/sina/spiders/__pycache__/
+WeiboSpider-searchv2/sina/spiders/__pycache__/
+
