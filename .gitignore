@@ -26,6 +26,7 @@ WeiboSpider-senior
 
 *.rar
 
-WeiboSpider-search/.idea/workspace.xml
-WeiboSpider-searchv2/.idea/workspace.xml
-WeiboSpider-searchName/.idea/workspace.xml
+WeiboSpider-search/.idea/
+WeiboSpider-searchv2/.idea/
+WeiboSpider-searchName/.idea/
+
