@@ -34,8 +34,8 @@ class WeiboSpider(RedisSpider):
     redis_key = "weibo_spider:start_urls"
 
     custom_settings = {
-        'CONCURRENT_REQUESTS': 16,
-        "DOWNLOAD_DELAY": 0.3,
+        'CONCURRENT_REQUESTS': 15,
+        "DOWNLOAD_DELAY": 0.1,
         'RETRY_TIMES': 40
     }
 
@@ -45,6 +45,7 @@ class WeiboSpider(RedisSpider):
         :param response:
         :return:
         """
+        print('开始解析搜索界面')
         if response.url.endswith('page=1'):
             # 如果是第1页，一次性获取后面的所有页
             all_page = re.search(r'/>&nbsp;1/(\d+)页</div>', response.text)
@@ -88,37 +89,42 @@ class WeiboSpider(RedisSpider):
                 # TODO 这里加上获取提问者的user_id的解析
                 # 换一下顺序，放到回答者的request后面，不行，这里的asker_name_url并不包含info
                 # 通过xpath结合正则表达式提取提问者的user_id，或者直接就是他的个人页面,但是这里获得的是以昵称为url的，跳转之后返回的就是id了
-                asker_name_url = tweet_node.xpath('.//a[contains(text(),"@")]/text()')[0]
-                tweet_item['asker_name'] = asker_name_url.split('@')[-1]
-                print('提问者的url', tweet_item['asker_name'])
+                asker_name_urltxt = tweet_node.xpath('.//a[contains(text(),"@")]/text()')[0]
+                asker_name_url = self.base_url + tweet_node.xpath('.//a[contains(text(),"@")]/@href')[0]
+                print('提问者的url', asker_name_url)
+                tweet_item['asker_name'] = asker_name_urltxt.split('@')[-1]
+                #asker_name_url = self.base_url + asker_name_url
+                print('提问者的昵称', tweet_item['asker_name'])
+
                 # TODO 这里yield一个提问者的request
                 # https://blog.csdn.net/rgc_520_zyl/article/details/78946974
                 #header = {,'User-Agent': 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.109 Safari/537.36'}
-                #yield Request(url=asker_name_url, callback=self.parse_asker, priority=1, meta={'asker_from': tweet_item['weibo_url']})
+                #asker 表的 _id 应该是tweet _id
+                yield Request(url=asker_name_url, callback=self.parse_asker, priority=2,headers = None)
 
+                # 测试asker暂时注释
                 # 检测由没有阅读全文:
-                all_content_link = tweet_content_node.xpath('.//a[text()="全文"]')
-                if all_content_link:
-                    all_content_url = self.base_url + all_content_link[0].xpath('./@href')[0]
-                    yield Request(all_content_url, callback=self.parse_all_content, meta={'item': tweet_item},
-                                  priority=1)
-
-                else:
-                    all_content = tweet_content_node.xpath('string(.)').replace('\u200b', '').strip()
-                    tweet_item['content'] = all_content[1:]
-                    yield tweet_item
-
+                # all_content_link = tweet_content_node.xpath('.//a[text()="全文"]')
+                # if all_content_link:
+                #     all_content_url = self.base_url + all_content_link[0].xpath('./@href')[0]
+                #     yield Request(all_content_url, callback=self.parse_all_content, meta={'item': tweet_item},
+                #                   priority=1)
+                #
+                # else:
+                #     all_content = tweet_content_node.xpath('string(.)').replace('\u200b', '').strip()
+                #     tweet_item['content'] = all_content[1:]
+                #     yield tweet_item
+                # 测试asker暂时注释
                 # yield Request(url="https://weibo.cn/{}/info".format(tweet_item['user_id']),
                 #               callback=self.parse_information, priority=2)
-                yield Request(url="https://weibo.cn/{}/info".format(tweet_item['user_id']),
-                              callback=self.parse_information, priority=2)
 
-                # TODO 检测有无评论，如果有yield一个parse_comment
-                if tweet_item['comment_num'] > 0:
-                    # 抓取该微博的评论信息
-                    comment_url = self.base_url + '/comment/' + tweet_item['weibo_url'].split('/')[-1] + '?page=1'
-                    yield Request(url=comment_url, callback=self.parse_comment,
-                                  meta={'weibo_url': tweet_item['weibo_url']}, priority=5)
+                # 检测有无评论，如果有yield一个parse_comment
+                # 测试asker暂时注释
+                # if tweet_item['comment_num'] > 0:
+                #     # 抓取该微博的评论信息
+                #     comment_url = self.base_url + '/comment/' + tweet_item['weibo_url'].split('/')[-1] + '?page=1'
+                #     yield Request(url=comment_url, callback=self.parse_comment,
+                #                   meta={'weibo_url': tweet_item['weibo_url']}, priority=5)
 
             except Exception as e:
                 self.logger.error(e)
@@ -164,12 +170,13 @@ class WeiboSpider(RedisSpider):
         :param response:
         :return:
         """
-        asker_from_url = response.meta['asker_from']
+        print('开始解析提问者界面！')
+        # asker_from_tweet = response.meta['asker_from']
         asker_url = response.url
         asker_id = asker_url.split('/')[-1]
         print("ASKER ID IS ", asker_id)
         yield Request(url=f"https://weibo.cn/{asker_id}/info",
-                      callback=self.parse_information, priority=2, meta={'asker_from': asker_from_url})
+                      callback=self.parse_information, priority=2)
     # 默认初始解析函数
     def parse_information(self, response):
         """
@@ -180,8 +187,8 @@ class WeiboSpider(RedisSpider):
         """
         """ 抓取个人信息 """
         information_item = InformationItem()
-        # if 'asker_from' in response.meta:
-        #     information_item['asker_from_url'] = response.meta['asker_from']
+        if response.meta.get('asker_from',None):
+            information_item['asker_from_tweet'] = response.meta['asker_from']
         information_item['crawl_time'] = int(time.time())
         selector = Selector(response)
         information_item['_id'] = re.findall('(\d+)/info', response.url)[0]

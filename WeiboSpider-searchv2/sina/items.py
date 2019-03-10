@@ -32,7 +32,7 @@ class InformationItem(Item):
     vip_level = Field()  # 会员等级
     authentication = Field()  # 认证
     person_url = Field()  # 首页链接
-    asker_from_url= Field()
+    asker_from_tweet= Field()
     crawl_time = Field()  # 抓取时间戳
 
 

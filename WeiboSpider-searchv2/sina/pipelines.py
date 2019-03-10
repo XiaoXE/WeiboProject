@@ -13,6 +13,7 @@ class MongoDBPipeline(object):
         self.Tweets = db["Tweets"]
         self.Comments = db["Comments"]
         self.Relationships = db["Relationships"]
+        self.Asker = db['Askers']
 
     def process_item(self, item, spider):
         """ 判断item的类型，并作相应的处理，再入数据库 """
@@ -21,7 +22,10 @@ class MongoDBPipeline(object):
         elif isinstance(item, TweetsItem):
             self.insert_item(self.Tweets, item)
         elif isinstance(item, InformationItem):
-            self.insert_item(self.Information, item)
+            if item.get('asker_from_tweet', None):
+                self.insert_item(self.Asker, item)
+            else:
+                self.insert_item(self.Information, item)
         elif isinstance(item, CommentItem):
             self.insert_item(self.Comments, item)
         return item

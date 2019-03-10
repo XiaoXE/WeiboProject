@@ -88,13 +88,18 @@ class WeiboSpider(RedisSpider):
                 # TODO 这里加上获取提问者的user_id的解析
                 # 换一下顺序，放到回答者的request后面，不行，这里的asker_name_url并不包含info
                 # 通过xpath结合正则表达式提取提问者的user_id，或者直接就是他的个人页面,但是这里获得的是以昵称为url的，跳转之后返回的就是id了
-                asker_name_url = tweet_node.xpath('.//a[contains(text(),"@")]/text()')[0]
-                tweet_item['asker_name'] = asker_name_url.split('@')[-1]
-                print('提问者的url', tweet_item['asker_name'])
+                asker_name_urltxt = tweet_node.xpath('.//a[contains(text(),"@")]/text()')[0]
+                asker_name_url = self.base_url + tweet_node.xpath('.//a[contains(text(),"@")]/@href')[0]
+                # print('提问者的url', asker_name_url)
+                tweet_item['asker_name'] = asker_name_urltxt.split('@')[-1]
+                # asker_name_url = self.base_url + asker_name_url
+                # print('提问者的昵称', tweet_item['asker_name'])
+
                 # TODO 这里yield一个提问者的request
                 # https://blog.csdn.net/rgc_520_zyl/article/details/78946974
-                #header = {,'User-Agent': 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.109 Safari/537.36'}
-                #yield Request(url=asker_name_url, callback=self.parse_asker, priority=1, meta={'asker_from': tweet_item['weibo_url']})
+                # header = {,'User-Agent': 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.109 Safari/537.36'}
+                # asker 表的 _id 应该是tweet _id
+                yield Request(url=asker_name_url, callback=self.parse_asker, meta={'asker_from': tweet_item['_id']})
 
                 # 检测由没有阅读全文:
                 all_content_link = tweet_content_node.xpath('.//a[text()="全文"]')
@@ -180,8 +185,8 @@ class WeiboSpider(RedisSpider):
         """
         """ 抓取个人信息 """
         information_item = InformationItem()
-        # if 'asker_from' in response.meta:
-        #     information_item['asker_from_url'] = response.meta['asker_from']
+        if response.meta.get('asker_from', None):
+            information_item['asker_from_tweet'] = response.meta['asker_from']
         information_item['crawl_time'] = int(time.time())
         selector = Selector(response)
         information_item['_id'] = re.findall('(\d+)/info', response.url)[0]

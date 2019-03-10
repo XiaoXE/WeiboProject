@@ -29,4 +29,6 @@ WeiboSpider-senior
 WeiboSpider-search/.idea/
 WeiboSpider-searchv2/.idea/
 WeiboSpider-searchName/.idea/
-
+WeiboSpider-search/sina/__pycache__/
+WeiboSpider-searchName/sina/__pycache__/
+WeiboSpider-searchv2/sina/__pycache__/

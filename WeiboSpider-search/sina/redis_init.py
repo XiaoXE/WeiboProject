@@ -25,7 +25,7 @@ keyword = "大家快来花1元围观～"
 # 搜索的起始日期，可修改 微博的创建日期是2009-08-16 也就是说不要采用这个日期更前面的日期了
 date_start = datetime.datetime.strptime("2018-12-01", '%Y-%m-%d')
 # 搜索的结束日期，可修改
-date_end = datetime.datetime.strptime("2019-03-08", '%Y-%m-%d')
+date_end = datetime.datetime.strptime("2019-03-09", '%Y-%m-%d')
 time_spread = datetime.timedelta(days=1)
 while date_start < date_end:
     next_time = date_start + time_spread
